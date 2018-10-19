@@ -77,5 +77,23 @@ namespace BL.Resources {
                 return ResourceManager.GetString("InvalidCredentials", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Session.
+        /// </summary>
+        public static string SessionExpired {
+            get {
+                return ResourceManager.GetString("SessionExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unauthorized.
+        /// </summary>
+        public static string Unauthorized {
+            get {
+                return ResourceManager.GetString("Unauthorized", resourceCulture);
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using BL.DTO.User;
+using BL.Enums;
+using BL.Exceptions;
 using BL.Repositories;
 using BL.Resources;
 using DAL.Entities;
@@ -11,26 +13,40 @@ using System.Threading.Tasks;
 
 namespace BL.Facades
 {
+    /// <summary>
+    /// Facade for user oriented logic
+    /// </summary>
     public class UserFacade : BaseFacade
     {
         private const int PBKDF2IterCount = 100000;
         private const int PBKDF2SubkeyLength = 160 / 8;
         private const int saltSize = 128 / 8;
 
-        private readonly Func<UserRepository> userRepositoryFunc;
+        private readonly Func<IUserRepository> userRepositoryFunc;
 
-        public UserFacade(Func<UserRepository> userRepository, Func<IUnitOfWorkProvider> uowFunc) : base(uowFunc)
+        /// <summary>
+        /// Creates new instance of User facade
+        /// </summary>
+        /// <param name="userRepositoryFunc">Functor of repository allowing operations on <see cref="User"/> entity</param>
+        /// <param name="uowFunc">Functor for instantiating <see cref="IUnitOfWorkProvider"/></param>
+        public UserFacade(Func<IUserRepository> userRepositoryFunc, Func<IUnitOfWorkProvider> uowFunc) : base(uowFunc)
         {
-            userRepositoryFunc = userRepository;
+            this.userRepositoryFunc = userRepositoryFunc;
         }
 
+        /// <summary>
+        /// Adds new user into system and signing him in
+        /// </summary>
+        /// <param name="user">User to be added</param>
+        /// <returns>Information about signed user</returns>
+        /// <exception cref="BLException">Throw when email has been already used</exception>
         public async Task<UserSignedDTO> AddUserAsync(UserCreateDTO user)
         {
             using (var uow = UowProviderFunc().Create())
             {
                 var repo = userRepositoryFunc();
-                if (GetUserByEmailAsync(user?.Email) != null)
-                    throw new UIException(ErrorMessages.EmailAlreadyUsed);
+                if (await repo.GetByEmailAsync(user?.Email) != null)
+                    throw new BLException(UserErrorCode.EmailAlreadyUsed, ErrorMessages.EmailAlreadyUsed);
 
                 var entity = Mapper.Map<User>(user);
                 var (hash, salt) = CreateHash(user.Password);
@@ -39,6 +55,7 @@ namespace BL.Facades
                 entity.PasswordSalt = salt;
                 entity.LastLoginOn = currentDateTime;
                 entity.CreatedOn = currentDateTime;
+                entity.TokenHash = Convert.ToBase64String(CreateHash(salt, user.Token));
 
                 repo.Insert(entity);
                 await uow.CommitAsync();
@@ -47,17 +64,28 @@ namespace BL.Facades
             }
         }
 
-        public async Task<UserDTO> GetUserByEmailAsync(string email)
+        /// <summary>
+        /// Gets user by identity
+        /// </summary>
+        /// <param name="id">User guid</param>
+        /// <returns>User found by Id</returns>
+        public async Task<UserDTO> GetUserAsync(Guid id)
         {
             using (var uow = UowProviderFunc().Create())
             {
                 var repo = userRepositoryFunc();
-                var user = await repo.GetByEmailAsync(email);
+                var user = await repo.GetByIdAsync(id);
 
                 return Mapper.Map<UserDTO>(user);
             }
         }
 
+        /// <summary>
+        /// Signs user in
+        /// </summary>
+        /// <param name="credentials">User credentials</param>
+        /// <returns>Information about signed user</returns>
+        /// <exception cref="BLException">Throw when user credentials are invalid</exception>
         public async Task<UserSignedDTO> SignInUser(UserCredentialsDTO credentials)
         {
             using (var uow = UowProviderFunc().Create())
@@ -65,7 +93,11 @@ namespace BL.Facades
                 var repo = userRepositoryFunc();
                 var user = await repo.GetByEmailAsync(credentials.Email);
                 if (user == null || !VerifyHashedPassword(user.PasswordHash, user.PasswordSalt, credentials.Password))
-                    throw new UIException(ErrorMessages.InvalidCredentials);
+                    throw new BLException(UserErrorCode.InvalidCredentials, ErrorMessages.InvalidCredentials);
+
+                user.LastLoginOn = DateTime.Now;
+                user.TokenHash = Convert.ToBase64String(CreateHash(user.PasswordSalt, credentials.Token));
+                await uow.CommitAsync();
 
                 return Mapper.Map<UserSignedDTO>(user);
             }
@@ -82,16 +114,19 @@ namespace BL.Facades
             }
         }
 
-        private bool VerifyHashedPassword(string hashedPassword, string salt, string password)
+        private static byte[] CreateHash(string salt, string password)
         {
-            byte[] hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
-            byte[] saltBytes = Convert.FromBase64String(salt);
-
+            var saltBytes = Convert.FromBase64String(salt);
             using (var deriveBytes = new Rfc2898DeriveBytes(password, saltBytes, PBKDF2IterCount))
             {
-                byte[] generatedSubkey = deriveBytes.GetBytes(PBKDF2SubkeyLength);
-                return hashedPasswordBytes.SequenceEqual(generatedSubkey);
+                return deriveBytes.GetBytes(PBKDF2SubkeyLength);
             }
+        }
+
+        private bool VerifyHashedPassword(string hashedPassword, string salt, string password)
+        {
+            var hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
+            return hashedPasswordBytes.SequenceEqual(CreateHash(salt, password));
         }
     }
 }

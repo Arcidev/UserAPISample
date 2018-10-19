@@ -23,6 +23,9 @@ namespace DAL.Entities
         [Required, StringLength(100)]
         public string PasswordHash { get; set; }
 
+        [Required, StringLength(100)]
+        public string TokenHash { get; set; }
+
         public DateTime CreatedOn { get; set; }
 
         public DateTime? LastUpdatedOn { get; set; }
