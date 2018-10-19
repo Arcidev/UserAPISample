@@ -6,10 +6,19 @@ using System.Security.Claims;
 
 namespace RestAPI.Security
 {
-    public class JwtTokenHelper
+    /// <summary>
+    /// Helper class for JTW Token
+    /// </summary>
+    public static class JwtTokenHelper
     {
+        /// <summary>
+        /// Symmetric Key
+        /// </summary>
         public const string Secret = "DSHLQr6nfgcOPqCBcGJWqHrw+/nULwVCpRiAtTTnrBY=";
 
+        /// <summary>
+        /// Validation parameters
+        /// </summary>
         public static TokenValidationParameters ValidationParameters => new TokenValidationParameters()
         {
             IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(Secret)),
@@ -20,6 +29,12 @@ namespace RestAPI.Security
             ValidateIssuer = false
         };
 
+        /// <summary>
+        /// Generates token for user
+        /// </summary>
+        /// <param name="email">User's email</param>
+        /// <param name="expireSeconds">Token expiration time in seconds</param>
+        /// <returns>Generated token</returns>
         public static string GenerateToken(string email, int expireSeconds = 30 * 60)
         {
             if (string.IsNullOrEmpty(email))
@@ -40,13 +55,18 @@ namespace RestAPI.Security
             return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
         }
 
+        /// <summary>
+        /// Verifies provided token
+        /// </summary>
+        /// <param name="token">Token to be verified</param>
+        /// <returns>User email obtained from token claims</returns>
         public static string VerifyToken(string token)
         {
             if (string.IsNullOrEmpty(token))
                 return null;
 
             var principal = new JwtSecurityTokenHandler().ValidateToken(token, ValidationParameters, out var _);
-            return principal.Identities.FirstOrDefault().Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            return principal.Identities.FirstOrDefault()?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
         }
     }
 }

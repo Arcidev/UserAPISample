@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using BL.DTO.User;
 using BL.Facades;
@@ -34,9 +35,12 @@ namespace RestAPI.Controllers
         [Authorize, HttpGet("{id}")]
         public async Task<UserDTO> Get(Guid id)
         {
-            var user = await userFacade.GetUserAsync(id);
+            var authenticationHeader = Request.Headers["Authentication"].First();
+            var token = authenticationHeader.Substring(authenticationHeader.IndexOf(" ") + 1);
 
-            return user;
+            return await ExecuteAsync(
+                () => userFacade.VerifyAndGetUser(id, token),
+                (ex) => throw new UnauthorizedException(ex));
         }
 
         /// <summary>

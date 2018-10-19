@@ -4,11 +4,10 @@ using BL.Enums;
 using BL.Exceptions;
 using BL.Repositories;
 using BL.Resources;
+using BL.Security;
 using DAL.Entities;
 using Riganti.Utils.Infrastructure.Core;
 using System;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace BL.Facades
@@ -18,10 +17,6 @@ namespace BL.Facades
     /// </summary>
     public class UserFacade : BaseFacade
     {
-        private const int PBKDF2IterCount = 100000;
-        private const int PBKDF2SubkeyLength = 160 / 8;
-        private const int saltSize = 128 / 8;
-
         private readonly Func<IUserRepository> userRepositoryFunc;
 
         /// <summary>
@@ -49,13 +44,13 @@ namespace BL.Facades
                     throw new BLException(UserErrorCode.EmailAlreadyUsed, ErrorMessages.EmailAlreadyUsed);
 
                 var entity = Mapper.Map<User>(user);
-                var (hash, salt) = CreateHash(user.Password);
+                var (hash, salt) = SecurityHelper.CreateHash(user.Password);
                 var currentDateTime = DateTime.Now;
                 entity.PasswordHash = hash;
                 entity.PasswordSalt = salt;
                 entity.LastLoginOn = currentDateTime;
                 entity.CreatedOn = currentDateTime;
-                entity.TokenHash = Convert.ToBase64String(CreateHash(salt, user.Token));
+                entity.TokenHash = Convert.ToBase64String(SecurityHelper.CreateHash(salt, user.Token));
 
                 repo.Insert(entity);
                 await uow.CommitAsync();
@@ -69,12 +64,15 @@ namespace BL.Facades
         /// </summary>
         /// <param name="id">User guid</param>
         /// <returns>User found by Id</returns>
-        public async Task<UserDTO> GetUserAsync(Guid id)
+        /// <exception cref="BLException">Throw when token provided does not match user token</exception>
+        public async Task<UserDTO> VerifyAndGetUser(Guid id, string token)
         {
             using (var uow = UowProviderFunc().Create())
             {
                 var repo = userRepositoryFunc();
                 var user = await repo.GetByIdAsync(id);
+                if (!SecurityHelper.VerifyHashedPassword(user.TokenHash, user.PasswordSalt, token))
+                    throw new BLException(UserErrorCode.TokenMismatch, ErrorMessages.Unauthorized);
 
                 return Mapper.Map<UserDTO>(user);
             }
@@ -92,41 +90,15 @@ namespace BL.Facades
             {
                 var repo = userRepositoryFunc();
                 var user = await repo.GetByEmailAsync(credentials.Email);
-                if (user == null || !VerifyHashedPassword(user.PasswordHash, user.PasswordSalt, credentials.Password))
+                if (user == null || !SecurityHelper.VerifyHashedPassword(user.PasswordHash, user.PasswordSalt, credentials.Password))
                     throw new BLException(UserErrorCode.InvalidCredentials, ErrorMessages.InvalidCredentials);
 
                 user.LastLoginOn = DateTime.Now;
-                user.TokenHash = Convert.ToBase64String(CreateHash(user.PasswordSalt, credentials.Token));
+                user.TokenHash = Convert.ToBase64String(SecurityHelper.CreateHash(user.PasswordSalt, credentials.Token));
                 await uow.CommitAsync();
 
                 return Mapper.Map<UserSignedDTO>(user);
             }
-        }
-
-        private (string, string) CreateHash(string password)
-        {
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, saltSize, PBKDF2IterCount))
-            {
-                var salt = deriveBytes.Salt;
-                var subkey = deriveBytes.GetBytes(PBKDF2SubkeyLength);
-
-                return (Convert.ToBase64String(subkey), Convert.ToBase64String(salt));
-            }
-        }
-
-        private static byte[] CreateHash(string salt, string password)
-        {
-            var saltBytes = Convert.FromBase64String(salt);
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, saltBytes, PBKDF2IterCount))
-            {
-                return deriveBytes.GetBytes(PBKDF2SubkeyLength);
-            }
-        }
-
-        private bool VerifyHashedPassword(string hashedPassword, string salt, string password)
-        {
-            var hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
-            return hashedPasswordBytes.SequenceEqual(CreateHash(salt, password));
         }
     }
 }

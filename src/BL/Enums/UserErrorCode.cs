@@ -14,6 +14,11 @@ namespace BL.Enums
         /// <summary>
         /// Provided credentials were invalid
         /// </summary>
-        InvalidCredentials
+        InvalidCredentials,
+
+        /// <summary>
+        /// Provided token does not match user token
+        /// </summary>
+        TokenMismatch
     }
 }

@@ -1,6 +1,5 @@
 using Microsoft.IdentityModel.Tokens;
 using RestAPI.Security;
-using System;
 using System.Threading;
 using Xunit;
 
