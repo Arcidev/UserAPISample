@@ -1,5 +1,6 @@
 using BL.Configuration;
 using BL.DTO.User;
+using BL.Exceptions;
 using BL.Facades;
 using BL.Repositories;
 using BL.Security;
@@ -67,14 +68,28 @@ namespace Tests.BL
         {
             var user = CreateUserObject();
             var mock = new Mock<IUserRepository>();
-            mock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).Returns(Task.FromResult(user));
+            mock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<IIncludeDefinition<User>>())).Returns(Task.FromResult(user));
 
             var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
             var userDto = await userFacade.VerifyAndGetUser(user.Id, password);
 
             Assert.NotNull(userDto);
             Assert.Equal(guid, userDto.Id);
+        }
 
+        [Fact]
+        public async Task TestInvalidTokenException()
+        {
+            var user = CreateUserObject();
+            user.TokenHash = user.PasswordSalt;
+
+            var mock = new Mock<IUserRepository>();
+            mock.Setup(x => x.GetByIdAsync(It.IsIn(Guid.Empty))).Returns(Task.FromResult<User>(null));
+            mock.Setup(x => x.GetByIdAsync(It.IsNotIn(Guid.Empty))).Returns(Task.FromResult(user));
+
+            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
+            await Assert.ThrowsAsync<BLException>(() => userFacade.VerifyAndGetUser(user.Id, password));
+            await Assert.ThrowsAsync<BLException>(() => userFacade.VerifyAndGetUser(Guid.Empty, password));
         }
 
         private static User CreateUserObject()

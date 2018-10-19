@@ -11,14 +11,22 @@ namespace RestAPI.Security
     /// </summary>
     public static class JwtTokenHelper
     {
+        private static string secret;
+
         /// <summary>
         /// Symmetric Key
         /// </summary>
-        public const string Secret = "DSHLQr6nfgcOPqCBcGJWqHrw+/nULwVCpRiAtTTnrBY=";
+        /// <exception cref="InvalidOperationException">Thrown when <see cref="secret"/> is null</exception>
+        public static string Secret
+        {
+            get { return secret ?? throw new InvalidOperationException(); }
+            set { secret = value; }
+        }
 
         /// <summary>
         /// Validation parameters
         /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when <see cref="Secret"/> is null</exception>
         public static TokenValidationParameters ValidationParameters => new TokenValidationParameters()
         {
             IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(Secret)),
@@ -35,6 +43,7 @@ namespace RestAPI.Security
         /// <param name="email">User's email</param>
         /// <param name="expireSeconds">Token expiration time in seconds</param>
         /// <returns>Generated token</returns>
+        /// <exception cref="InvalidOperationException">Thrown when <see cref="Secret"/> is null</exception>
         public static string GenerateToken(string email, int expireSeconds = 30 * 60)
         {
             if (string.IsNullOrEmpty(email))
@@ -60,6 +69,7 @@ namespace RestAPI.Security
         /// </summary>
         /// <param name="token">Token to be verified</param>
         /// <returns>User email obtained from token claims</returns>
+        /// <exception cref="InvalidOperationException">Thrown when <see cref="Secret"/> is null</exception>
         public static string VerifyToken(string token)
         {
             if (string.IsNullOrEmpty(token))

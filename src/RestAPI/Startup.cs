@@ -26,11 +26,12 @@ namespace RestAPI
         public void ConfigureServices(IServiceCollection services)
         {
             AutoMapperInstaller.Init();
+            JwtTokenHelper.Secret = Configuration["SymmetricKeys:JwtTokenKey"];
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            var connection = @"Server=(localdb)\mssqllocaldb;Database=UserAPISample";
-            services.ConfigureServices(connection)
+            services.ConfigureDatabase(Configuration.GetConnectionString("UserAPISampleDatabase"))
+                .ConfigureServices()
                 .ConfigureFacades()
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer((options) =>

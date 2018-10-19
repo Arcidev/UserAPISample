@@ -1,6 +1,5 @@
 ﻿using BL.Repositories;
 using BL.Repositories.Implementations;
-using DAL.Installers;
 using Microsoft.Extensions.DependencyInjection;
 using Riganti.Utils.Infrastructure.Core;
 using Riganti.Utils.Infrastructure.EntityFrameworkCore;
@@ -18,13 +17,12 @@ namespace BL.Configuration
         /// </summary>
         /// <param name="services">DI container</param>
         /// <returns>Passed DI container to allow chaining</returns>
-        public static IServiceCollection ConfigureServices(this IServiceCollection services, string connectionString)
+        public static IServiceCollection ConfigureServices(this IServiceCollection services)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
-            return services.ConfigureDatabase(connectionString)
-                .AddSingleton<IUnitOfWorkProvider, AppUnitOfWorkProvider>()
+            return services.AddSingleton<IUnitOfWorkProvider, AppUnitOfWorkProvider>()
                 .AddSingleton<IUnitOfWorkRegistry, AsyncLocalUnitOfWorkRegistry>()
                 .AddSingleton<IDateTimeProvider, UtcDateTimeProvider>()
                 .AddTransient<IUserRepository, UserRepository>()

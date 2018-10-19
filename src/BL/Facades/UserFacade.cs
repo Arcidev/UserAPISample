@@ -7,6 +7,7 @@ using BL.Resources;
 using BL.Security;
 using DAL.Entities;
 using Riganti.Utils.Infrastructure.Core;
+using Riganti.Utils.Infrastructure.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
@@ -70,8 +71,8 @@ namespace BL.Facades
             using (var uow = UowProviderFunc().Create())
             {
                 var repo = userRepositoryFunc();
-                var user = await repo.GetByIdAsync(id);
-                if (!SecurityHelper.VerifyHashedPassword(user.TokenHash, user.PasswordSalt, token))
+                var user = await repo.GetByIdAsync(id, new StringPathIncludeDefinition<User>(nameof(User.Telephones)));
+                if (user == null || !SecurityHelper.VerifyHashedPassword(user.TokenHash, user.PasswordSalt, token))
                     throw new BLException(UserErrorCode.TokenMismatch, ErrorMessages.Unauthorized);
 
                 return Mapper.Map<UserDTO>(user);

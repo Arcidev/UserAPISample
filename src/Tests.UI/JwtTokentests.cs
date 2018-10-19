@@ -8,6 +8,11 @@ namespace Tests.UI
     public class JwtTokenTests
     {
         private const string email = "test@mail.sk";
+        
+        public JwtTokenTests()
+        {
+            JwtTokenHelper.Secret = "T5fIrHHdA18GhTMdOKF5jdFfNpr7uouIOd6ZAH0q8k4=";
+        }
 
         [Fact]
         public void TestValidToken()

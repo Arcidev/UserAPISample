@@ -28,6 +28,7 @@ namespace BL.Configuration
                     config.CreateMap<User, UserSignedDTO>();
 
                     config.CreateMap<Phone, PhoneDTO>();
+                    config.CreateMap<PhoneDTO, Phone>();
                 });
             }
         }
