@@ -5,11 +5,17 @@ using DAL.Entities;
 
 namespace BL.Configuration
 {
+    /// <summary>
+    /// Static class for initializing Automapper
+    /// </summary>
     public static class AutoMapperInstaller
     {
         private static bool isInitialized = false;
         private static readonly object locker = new object();
 
+        /// <summary>
+        /// Initializes automapper
+        /// </summary>
         public static void Init()
         {
             if (isInitialized)

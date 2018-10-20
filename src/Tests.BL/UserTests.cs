@@ -27,7 +27,6 @@ namespace Tests.BL
         public async Task TestAddUser()
         {
             var mock = new Mock<IUserRepository>();
-            SetGetByEmailMock(mock, null);
             mock.Setup(x => x.Insert(It.IsNotNull<User>())).Callback((User user) => user.Id = guid);
 
             var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
@@ -49,7 +48,7 @@ namespace Tests.BL
         {
             var user = CreateUserObject();
             var mock = new Mock<IUserRepository>();
-            SetGetByEmailMock(mock, user);
+            mock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
 
             var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
             var signedUser = await userFacade.SignInUser(new UserCredentialsDTO()
@@ -84,8 +83,7 @@ namespace Tests.BL
             user.TokenHash = user.PasswordSalt;
 
             var mock = new Mock<IUserRepository>();
-            mock.Setup(x => x.GetByIdAsync(It.IsIn(Guid.Empty))).Returns(Task.FromResult<User>(null));
-            mock.Setup(x => x.GetByIdAsync(It.IsNotIn(Guid.Empty))).Returns(Task.FromResult(user));
+            mock.Setup(x => x.GetByIdAsync(It.IsNotIn(Guid.Empty), It.IsAny<IIncludeDefinition<User>>())).Returns(Task.FromResult(user));
 
             var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
             await Assert.ThrowsAsync<BLException>(() => userFacade.VerifyAndGetUser(user.Id, password));
@@ -102,11 +100,6 @@ namespace Tests.BL
                 Id = guid,
                 TokenHash = hash
             };
-        }
-
-        private static void SetGetByEmailMock(Mock<IUserRepository> mock, User returnObject)
-        {
-            mock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(returnObject));
         }
 
         private static IUnitOfWorkProvider CreateUoWProviderMock()

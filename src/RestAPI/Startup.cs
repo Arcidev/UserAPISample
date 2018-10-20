@@ -36,7 +36,7 @@ namespace RestAPI
                 .ConfigureServices()
                 .ConfigureFacades()
                 .AddSingleton<ILoggerFactory, LoggerFactory>()
-                .AddSingleton(provider => provider.GetService<ILoggerFactory>().CreateLogger("RestAPI"))
+                .AddSingleton(provider => provider.GetService<ILoggerFactory>().CreateLogger("UserAPISample"))
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer((options) =>
                 {

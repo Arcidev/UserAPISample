@@ -9,6 +9,7 @@ using DAL.Entities;
 using Riganti.Utils.Infrastructure.Core;
 using Riganti.Utils.Infrastructure.EntityFrameworkCore;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace BL.Facades
@@ -38,6 +39,10 @@ namespace BL.Facades
         /// <exception cref="BLException">Throw when email has been already used</exception>
         public async Task<UserSignedDTO> AddUserAsync(UserCreateDTO user)
         {
+            // check email address first
+            if (!new EmailAddressAttribute().IsValid(user.Email))
+                throw new BLException(UserErrorCode.InvalidEmail, ErrorMessages.InvalidEmail);
+
             using (var uow = UowProviderFunc().Create())
             {
                 var repo = userRepositoryFunc();
@@ -56,7 +61,9 @@ namespace BL.Facades
                 repo.Insert(entity);
                 await uow.CommitAsync();
 
-                return Mapper.Map<UserSignedDTO>(entity);
+                var result = Mapper.Map<UserSignedDTO>(entity);
+                result.Token = user.Token;
+                return result;
             }
         }
 
@@ -98,7 +105,9 @@ namespace BL.Facades
                 user.TokenHash = Convert.ToBase64String(SecurityHelper.CreateHash(user.PasswordSalt, credentials.Token));
                 await uow.CommitAsync();
 
-                return Mapper.Map<UserSignedDTO>(user);
+                var result = Mapper.Map<UserSignedDTO>(user);
+                result.Token = credentials.Token;
+                return result;
             }
         }
     }

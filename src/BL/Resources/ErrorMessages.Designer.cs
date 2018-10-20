@@ -61,7 +61,7 @@ namespace BL.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The email address you have entered is already registered..
+        ///   Looks up a localized string similar to E-mail already exists.
         /// </summary>
         public static string EmailAlreadyUsed {
             get {
@@ -75,6 +75,15 @@ namespace BL.Resources {
         public static string InvalidCredentials {
             get {
                 return ResourceManager.GetString("InvalidCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email you have provided is not valid.
+        /// </summary>
+        public static string InvalidEmail {
+            get {
+                return ResourceManager.GetString("InvalidEmail", resourceCulture);
             }
         }
         

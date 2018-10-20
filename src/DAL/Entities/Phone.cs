@@ -4,13 +4,25 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DAL.Entities
 {
+    /// <summary>
+    /// Phone entity
+    /// </summary>
     public class Phone
     {
+        /// <summary>
+        /// User Id
+        /// </summary>
         public Guid UserId { get; set; }
 
+        /// <summary>
+        /// Phone number
+        /// </summary>
         [Required]
         public string Number { get; set; }
 
+        /// <summary>
+        /// Reference to user to whom the phone belongs
+        /// </summary>
         [ForeignKey(nameof(UserId))]
         public virtual User Useer { get; set; }
     }

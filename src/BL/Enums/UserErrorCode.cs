@@ -17,6 +17,11 @@ namespace BL.Enums
         InvalidCredentials,
 
         /// <summary>
+        /// Provided email is not valid
+        /// </summary>
+        InvalidEmail,
+
+        /// <summary>
         /// Provided token does not match user token
         /// </summary>
         TokenMismatch
