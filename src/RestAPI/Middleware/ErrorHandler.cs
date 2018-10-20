@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestAPI.Exceptions;
 using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace RestAPI.MiddlewareHandler
+namespace RestAPI.Middleware
 {
     /// <summary>
     /// Error handler middleware
@@ -13,14 +14,17 @@ namespace RestAPI.MiddlewareHandler
     public class ErrorHandler
     {
         private readonly RequestDelegate next;
+        private readonly ILogger logger;
 
         /// <summary>
         /// Creates new instance of error handler
         /// </summary>
         /// <param name="next">Delegate to process request</param>
-        public ErrorHandler(RequestDelegate next)
+        /// <param name="logger">Logging interface</param>
+        public ErrorHandler(RequestDelegate next, ILogger logger)
         {
             this.next = next;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -46,8 +50,10 @@ namespace RestAPI.MiddlewareHandler
         /// <param name="context">Current http context</param>
         /// <param name="exception">Exception to be handled</param>
         /// <returns>Awaitable task</returns>
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            logger.LogError(exception, exception.Message);
+
             var code = HttpStatusCode.InternalServerError;
 
             if (exception is UnauthorizedException)
@@ -55,7 +61,7 @@ namespace RestAPI.MiddlewareHandler
             else if (exception is BadRequestException)
                 code = HttpStatusCode.BadRequest;
 
-            var result = JsonConvert.SerializeObject(new { message = exception.Message });
+            var result = JsonConvert.SerializeObject(new { exception.Message });
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
             return context.Response.WriteAsync(result);
