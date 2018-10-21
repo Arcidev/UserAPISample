@@ -6,8 +6,15 @@ using System.Net;
 
 namespace RestAPI.Middleware
 {
+    /// <summary>
+    /// Not found middleware
+    /// </summary>
     public static class NotFoundMiddleware
     {
+        /// <summary>
+        /// Setups middleware that will intercept <see cref="HttpStatusCode.NotFound"/> returing JSON message with appropriate status code
+        /// </summary>
+        /// <param name="app">App builder</param>
         public static void UseNotFoundMiddleware(this IApplicationBuilder app)
         {
             app.Use(async (context, next) =>
