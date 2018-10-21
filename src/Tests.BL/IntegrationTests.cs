@@ -78,6 +78,17 @@ namespace Tests.BL
         }
 
         [Fact]
+        public async Task TestInvalidCredentials()
+        {
+            var user = User;
+            var userFacade = services.GetService<UserFacade>();
+            await userFacade.AddUserAsync(user);
+
+            await Assert.ThrowsAsync<BLException>(() => userFacade.SignInUser(new UserCredentialsDTO()));
+            await Assert.ThrowsAsync<BLException>(() => userFacade.SignInUser(new UserCredentialsDTO() { Email = user.Email, Password = $"{password}{password}" }));
+        }
+
+        [Fact]
         public async Task TestAddAndVerifyUser()
         {
             var user = User;

@@ -90,6 +90,20 @@ namespace Tests.BL
             await Assert.ThrowsAsync<BLException>(() => userFacade.VerifyAndGetUser(Guid.Empty, password));
         }
 
+        [Fact]
+        public async Task TestInvalidCredentials()
+        {
+            var user = CreateUserObject();
+            user.TokenHash = user.PasswordSalt;
+
+            var mock = new Mock<IUserRepository>();
+            mock.Setup(x => x.GetByEmailAsync(It.IsNotNull<string>())).Returns(Task.FromResult(user));
+
+            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
+            await Assert.ThrowsAsync<BLException>(() => userFacade.SignInUser(new UserCredentialsDTO()));
+            await Assert.ThrowsAsync<BLException>(() => userFacade.SignInUser(new UserCredentialsDTO() { Email = string.Empty, Password = $"{password}{password}" }));
+        }
+
         private static User CreateUserObject()
         {
             var (hash, salt) = SecurityHelper.CreateHash(password);
