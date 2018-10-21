@@ -79,15 +79,6 @@ namespace BL.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Email you have provided is not valid.
-        /// </summary>
-        public static string InvalidEmail {
-            get {
-                return ResourceManager.GetString("InvalidEmail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid Session.
         /// </summary>
         public static string SessionExpired {

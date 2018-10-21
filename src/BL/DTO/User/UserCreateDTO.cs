@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace BL.DTO.User
 {
     /// <summary>
@@ -9,6 +11,7 @@ namespace BL.DTO.User
         /// <summary>
         /// User password
         /// </summary>
+        [Required]
         public string Password { get; set; }
 
         /// <summary>

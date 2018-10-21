@@ -35,8 +35,9 @@ namespace RestAPI.Controllers
         [Authorize, HttpGet("{id}")]
         public async Task<UserDTO> Get(Guid id)
         {
-            var authenticationHeader = Request.Headers["Authentication"].First();
-            var token = authenticationHeader.Substring(authenticationHeader.IndexOf(" ") + 1);
+            // Authorize attribute ensures that token is there
+            var authorizationHeader = Request.Headers["Authorization"].First();
+            var token = authorizationHeader.Substring(authorizationHeader.IndexOf(" ") + 1);
 
             return await ExecuteAsync(
                 () => userFacade.VerifyAndGetUser(id, token),

@@ -20,7 +20,7 @@ namespace DAL.Entities
         /// <summary>
         /// Email
         /// </summary>
-        [Required, StringLength(100)]
+        [Required, EmailAddress, StringLength(100)]
         public string Email { get; set; }
 
         /// <summary>

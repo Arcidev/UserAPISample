@@ -9,7 +9,6 @@ using DAL.Entities;
 using Riganti.Utils.Infrastructure.Core;
 using Riganti.Utils.Infrastructure.EntityFrameworkCore;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace BL.Facades
@@ -39,10 +38,6 @@ namespace BL.Facades
         /// <exception cref="BLException">Throw when email has been already used</exception>
         public async Task<UserSignedDTO> AddUserAsync(UserCreateDTO user)
         {
-            // check email address first
-            if (!new EmailAddressAttribute().IsValid(user.Email))
-                throw new BLException(UserErrorCode.InvalidEmail, ErrorMessages.InvalidEmail);
-
             using (var uow = UowProviderFunc().Create())
             {
                 var repo = userRepositoryFunc();

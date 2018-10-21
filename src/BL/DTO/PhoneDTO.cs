@@ -1,4 +1,5 @@
-﻿
+﻿using System.ComponentModel.DataAnnotations;
+
 namespace BL.DTO
 {
     /// <summary>
@@ -9,6 +10,7 @@ namespace BL.DTO
         /// <summary>
         /// Phone number
         /// </summary>
+        [Required]
         public string Number { get; set; }
     }
 }

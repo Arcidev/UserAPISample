@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BL.DTO.User
 {
@@ -10,11 +11,13 @@ namespace BL.DTO.User
         /// <summary>
         /// User email
         /// </summary>
+        [Required, EmailAddress]
         public string Email { get; set; }
 
         /// <summary>
         /// User name
         /// </summary>
+        [Required]
         public string Name { get; set; }
 
         /// <summary>
