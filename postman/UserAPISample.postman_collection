@@ -1,0 +1,561 @@
+{
+	"info": {
+		"_postman_id": "5cd1d40c-a636-4f6b-8975-f63eb6f679ae",
+		"name": "User API Sample",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "001 - Sign Up",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "42db7949-c7dd-46f6-8a0a-13d6ffc7cbe8",
+						"exec": [
+							"pm.environment.set(\"Email\", \"{{$guid}}@mail.sk\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9afbdf5f-f033-4401-8f10-0d8e187b3b30",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Id is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).not.eql(null);",
+							"    pm.environment.set(\"Id\", jsonData.id);",
+							"});",
+							"",
+							"pm.test(\"CreatedOn is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.createdOn).not.eql(null);",
+							"});",
+							"",
+							"pm.test(\"LastLoginOn is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.lastLoginOn).not.eql(null);",
+							"});",
+							"",
+							"pm.test(\"LastUpdatedOn is null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.lastUpdatedOn).to.eql(null);",
+							"});",
+							"",
+							"pm.test(\"Token is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.token).not.eql(null);",
+							"    pm.environment.set(\"Token\", jsonData.token);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"Name\": \"{{Name}}\",\n\t\"Email\": \"{{Email}}\",\n\t\"Password\": \"{{Password}}\",\n\t\"Telephones\": [{ \"Number\": \"{{PhoneNumber}}\"}]\n}\n"
+				},
+				"url": {
+					"raw": "{{Host}}/api/users/signUp",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"signUp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "002 - Get User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ec38f27-bc8e-4f30-85fc-3f4502755853",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var id = pm.environment.get(\"Id\");",
+							"pm.test(\"Id is \" + id, function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.eql(id);",
+							"});",
+							"",
+							"pm.test(\"CreatedOn is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.createdOn).not.eql(null);",
+							"});",
+							"",
+							"pm.test(\"LastLoginOn is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.lastLoginOn).not.eql(null);",
+							"});",
+							"",
+							"pm.test(\"LastUpdatedOn is null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.lastUpdatedOn).to.eql(null);",
+							"});",
+							"",
+							"var fullName = pm.environment.get(\"Name\");",
+							"pm.test(\"Name is \" + fullName, function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.name).to.eql(fullName);",
+							"});",
+							"",
+							"pm.test(\"Email is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.email).not.eql(null);",
+							"    pm.environment.set(\"Email\", jsonData.email);",
+							"});",
+							"",
+							"var phone = pm.environment.get(\"PhoneNumber\");",
+							"pm.test(\"Telephones has first phone \" + phone, function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.telephones[0].number).to.eql(phone);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:55467/api/users/{{Id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "55467",
+					"path": [
+						"api",
+						"users",
+						"{{Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "003 - Sign In",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ecfc052-e73c-4739-b094-08419db40604",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Id is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).not.eql(null);",
+							"    pm.environment.set(\"Id\", jsonData.id);",
+							"});",
+							"",
+							"pm.test(\"CreatedOn is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.createdOn).not.eql(null);",
+							"});",
+							"",
+							"pm.test(\"LastLoginOn is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.lastLoginOn).not.eql(null);",
+							"});",
+							"",
+							"pm.test(\"LastUpdatedOn is null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.lastUpdatedOn).to.eql(null);",
+							"});",
+							"",
+							"pm.test(\"Token is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.token).not.eql(null);",
+							"    pm.environment.set(\"Token\", jsonData.token);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"Email\": \"{{Email}}\",\n\t\"Password\": \"{{Password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{Host}}/api/users/signIn",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"signIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "004 - Sign Up - Existing mail",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "42db7949-c7dd-46f6-8a0a-13d6ffc7cbe8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9afbdf5f-f033-4401-8f10-0d8e187b3b30",
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"Name\": \"{{Name}}\",\n\t\"Email\": \"{{Email}}\",\n\t\"Password\": \"{{Password}}\",\n\t\"Telephones\": [{ \"Number\": \"{{PhoneNumber}}\"}]\n}\n"
+				},
+				"url": {
+					"raw": "{{Host}}/api/users/signUp",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"signUp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "005 - Sign In - Invalid password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ecfc052-e73c-4739-b094-08419db40604",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Message is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).not.eql(null);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"Email\": \"{{Email}}\",\n\t\"Password\": \"{{Password}}{{Password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{Host}}/api/users/signIn",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"signIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "006 - Sign In - Not existing email",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ecfc052-e73c-4739-b094-08419db40604",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Message is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).not.eql(null);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"Email\": \"mail{{Email}}\",\n\t\"Password\": \"{{Password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{Host}}/api/users/signIn",
+					"host": [
+						"{{Host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"signIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "007 - Get User - Missing auth header",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ec38f27-bc8e-4f30-85fc-3f4502755853",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Message is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).not.eql(null);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:55467/api/users/{{Id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "55467",
+					"path": [
+						"api",
+						"users",
+						"{{Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "008 - Get User - Not existing user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ec38f27-bc8e-4f30-85fc-3f4502755853",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Message is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).not.eql(null);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:55467/api/users/{{$guid}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "55467",
+					"path": [
+						"api",
+						"users",
+						"{{$guid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "009 - Not found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8ec38f27-bc8e-4f30-85fc-3f4502755853",
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Message is not null\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).not.eql(null);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:55467/api/users/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "55467",
+					"path": [
+						"api",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

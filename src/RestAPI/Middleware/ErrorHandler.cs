@@ -61,7 +61,7 @@ namespace RestAPI.Middleware
             else if (exception is BadRequestException)
                 code = HttpStatusCode.BadRequest;
 
-            var result = JsonConvert.SerializeObject(new { exception.Message });
+            var result = JsonConvert.SerializeObject(new { message = exception.Message });
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
             return context.Response.WriteAsync(result);

@@ -71,6 +71,7 @@ namespace RestAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseNotFoundMiddleware();
             app.UseMiddleware(typeof(ErrorHandler));
             app.UseAuthentication();
             app.UseMvc();
