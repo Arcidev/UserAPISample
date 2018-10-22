@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RestAPI.Exceptions;
 using RestAPI.Middleware;
+using RestAPI.Responses;
 using RestAPI.Security;
 using System;
 
@@ -35,6 +36,10 @@ namespace RestAPI
             services.ConfigureDatabase(Configuration.GetConnectionString("UserAPISampleDatabase"))
                 .ConfigureServices()
                 .ConfigureFacades()
+                .Configure<ApiBehaviorOptions>(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context => new BadRequestObjectResultCustom(context.ModelState, ErrorMessages.InvalidInput);
+                })
                 .AddSingleton<ILoggerFactory, LoggerFactory>()
                 .AddSingleton(provider => provider.GetService<ILoggerFactory>().CreateLogger("UserAPISample"))
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

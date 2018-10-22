@@ -79,6 +79,15 @@ namespace BL.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Provided input object was not valid.
+        /// </summary>
+        public static string InvalidInput {
+            get {
+                return ResourceManager.GetString("InvalidInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not found.
         /// </summary>
         public static string NotFound {

@@ -123,6 +123,9 @@
   <data name="InvalidCredentials" xml:space="preserve">
     <value>Invalid user and / or password</value>
   </data>
+  <data name="InvalidInput" xml:space="preserve">
+    <value>Provided input object was not valid</value>
+  </data>
   <data name="NotFound" xml:space="preserve">
     <value>Not found</value>
   </data>
