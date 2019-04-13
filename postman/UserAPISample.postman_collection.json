@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bec244ce-15c3-4dbe-a98e-e40b45f008cb",
+		"_postman_id": "cd41ff8c-2b81-49e6-921e-4b630fe715b2",
 		"name": "User API Sample",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -162,12 +162,10 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:55467/api/users/{{Id}}",
-					"protocol": "http",
+					"raw": "{{Host}}/api/users/{{Id}}",
 					"host": [
-						"localhost"
+						"{{Host}}"
 					],
-					"port": "55467",
 					"path": [
 						"api",
 						"users",
@@ -434,12 +432,10 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:55467/api/users/{{Id}}",
-					"protocol": "http",
+					"raw": "{{Host}}/api/users/{{Id}}",
 					"host": [
-						"localhost"
+						"{{Host}}"
 					],
-					"port": "55467",
 					"path": [
 						"api",
 						"users",
@@ -488,12 +484,10 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:55467/api/users/{{$guid}}",
-					"protocol": "http",
+					"raw": "{{Host}}/api/users/{{$guid}}",
 					"host": [
-						"localhost"
+						"{{Host}}"
 					],
-					"port": "55467",
 					"path": [
 						"api",
 						"users",
@@ -542,12 +536,10 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:55467/api/users/",
-					"protocol": "http",
+					"raw": "{{Host}}/api/users/",
 					"host": [
-						"localhost"
+						"{{Host}}"
 					],
-					"port": "55467",
 					"path": [
 						"api",
 						"users",
