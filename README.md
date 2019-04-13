@@ -1,4 +1,5 @@
 # UserAPISample
+Sample Rest API application handling user sign up/sign in and verification using JWT token
 
 ## Build Status
 [![Build status](https://img.shields.io/appveyor/ci/Arcidev/userapisample.svg?style=flat-square)](https://ci.appveyor.com/project/Arcidev/userapisample)
