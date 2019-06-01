@@ -39,8 +39,8 @@ namespace Tests.BL
 
             Assert.NotNull(signedUser);
             Assert.Equal(guid, signedUser.Id);
-            Assert.NotEqual(default(DateTime), signedUser.LastLoginOn);
-            Assert.NotEqual(default(DateTime), signedUser.CreatedOn);
+            Assert.NotEqual(default, signedUser.LastLoginOn);
+            Assert.NotEqual(default, signedUser.CreatedOn);
         }
 
         [Fact]

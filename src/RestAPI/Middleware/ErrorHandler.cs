@@ -21,7 +21,7 @@ namespace RestAPI.Middleware
         /// </summary>
         /// <param name="next">Delegate to process request</param>
         /// <param name="logger">Logging interface</param>
-        public ErrorHandler(RequestDelegate next, ILogger logger)
+        public ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
         {
             this.next = next;
             this.logger = logger;

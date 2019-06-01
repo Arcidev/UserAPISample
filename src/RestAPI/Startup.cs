@@ -6,13 +6,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using RestAPI.Exceptions;
 using RestAPI.Middleware;
 using RestAPI.Responses;
 using RestAPI.Security;
-using System;
 
 namespace RestAPI
 {
@@ -31,7 +30,7 @@ namespace RestAPI
             AutoMapperInstaller.Init();
             JwtTokenHelper.Secret = Configuration["SymmetricKeys:JwtTokenKey"];
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(opt => opt.EnableEndpointRouting = false).AddNewtonsoftJson().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.ConfigureDatabase(Configuration.GetConnectionString("UserAPISampleDatabase"))
                 .ConfigureServices()
@@ -40,8 +39,6 @@ namespace RestAPI
                 {
                     options.InvalidModelStateResponseFactory = context => new BadRequestObjectResultCustom(context.ModelState, ErrorMessages.InvalidInput);
                 })
-                .AddSingleton<ILoggerFactory, LoggerFactory>()
-                .AddSingleton(provider => provider.GetService<ILoggerFactory>().CreateLogger("UserAPISample"))
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer((options) =>
                 {
@@ -62,10 +59,8 @@ namespace RestAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            loggerFactory.AddEventLog(Enum.TryParse<LogLevel>(Configuration["Logging:LogLevel:Default"], out var logLevel) ? logLevel : LogLevel.Warning);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
