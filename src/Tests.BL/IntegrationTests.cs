@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Tests.BL
 {
-    public class IntegrationTests
+    public class IntegrationTests : IDisposable
     {
         private readonly IServiceProvider services;
         private const string password = "123456";
@@ -41,6 +41,11 @@ namespace Tests.BL
                 .BuildServiceProvider();
         }
 
+        public void Dispose()
+        {
+            services.GetService<AppDbContext>().Database.EnsureDeleted();
+        }
+
         [Fact]
         public async Task TestAddUser()
         {
@@ -49,8 +54,8 @@ namespace Tests.BL
 
             Assert.NotNull(signedUser);
             Assert.NotEqual(Guid.Empty, signedUser.Id);
-            Assert.NotEqual(default(DateTime), signedUser.LastLoginOn);
-            Assert.NotEqual(default(DateTime), signedUser.CreatedOn);
+            Assert.NotEqual(default, signedUser.LastLoginOn);
+            Assert.NotEqual(default, signedUser.CreatedOn);
         }
 
         [Fact]
@@ -63,8 +68,8 @@ namespace Tests.BL
             var signedUser = await userFacade.SignInUser(new UserCredentialsDTO() { Email = user.Email, Password = user.Password, Token = user.Token });
             Assert.NotNull(signedUser);
             Assert.NotEqual(Guid.Empty, signedUser.Id);
-            Assert.NotEqual(default(DateTime), signedUser.LastLoginOn);
-            Assert.NotEqual(default(DateTime), signedUser.CreatedOn);
+            Assert.NotEqual(default, signedUser.LastLoginOn);
+            Assert.NotEqual(default, signedUser.CreatedOn);
         }
 
         [Fact]
