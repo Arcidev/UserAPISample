@@ -10,4 +10,4 @@ Sample Rest API application handling user sign up/sign in and verification using
 [![License](https://img.shields.io/github/license/Arcidev/UserAPISample.svg?style=flat-square)](LICENSE)
 
 ## Documentation
-[![Documentation](https://codedocs.xyz/Arcidev/UserAPISample.svg)](https://codedocs.xyz/Arcidev/UserAPISample/)
+[![Documentation](https://img.shields.io/badge/code-documented-brightgreen.svg?style=flat-square)](https://codedocs.xyz/Arcidev/UserAPISample/)
