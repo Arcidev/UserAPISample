@@ -27,12 +27,12 @@ namespace RestAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            AutoMapperInstaller.Init();
             JwtTokenHelper.Secret = Configuration["SymmetricKeys:JwtTokenKey"];
 
             services.AddMvc(opt => opt.EnableEndpointRouting = false).AddNewtonsoftJson().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.ConfigureDatabase(Configuration.GetConnectionString("UserAPISampleDatabase"))
+                .ConfigureAutoMapper()
                 .ConfigureServices()
                 .ConfigureFacades()
                 .Configure<ApiBehaviorOptions>(options =>

@@ -31,11 +31,10 @@ namespace Tests.BL
 
         public IntegrationTests()
         {
-            AutoMapperInstaller.Init();
-
             services = new ServiceCollection()
                 .AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("TestDB"), ServiceLifetime.Transient, ServiceLifetime.Transient)
                 .AddTransient<Func<DbContext>>(provider => () => provider.GetService<AppDbContext>())
+                .ConfigureAutoMapper()
                 .ConfigureServices()
                 .ConfigureFacades()
                 .BuildServiceProvider();

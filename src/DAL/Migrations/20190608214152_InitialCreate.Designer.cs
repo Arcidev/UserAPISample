@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20181018113639_InitialCreate")]
+    [Migration("20190608214152_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "3.0.0-preview5.19227.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -25,7 +25,8 @@ namespace DAL.Migrations
                 {
                     b.Property<Guid>("UserId");
 
-                    b.Property<string>("Number");
+                    b.Property<string>("Number")
+                        .HasMaxLength(50);
 
                     b.HasKey("UserId", "Number");
 
@@ -59,6 +60,10 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(100);
 
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(100);
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
@@ -69,10 +74,11 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Entities.Phone", b =>
                 {
-                    b.HasOne("DAL.Entities.User", "Useer")
+                    b.HasOne("DAL.Entities.User", "User")
                         .WithMany("Telephones")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

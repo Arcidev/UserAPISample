@@ -14,7 +14,7 @@ namespace RestAPI.Exceptions
         /// </summary>
         /// <param name="message">Description</param>
         /// <param name="innerException">Exception which caused result code 401</param>
-        public UnauthorizedException(string message, Exception innerException = null) : base(message, innerException) { }
+        public UnauthorizedException(string message, Exception innerException) : base(message, innerException) { }
 
         /// <summary>
         /// Creates new instance of exception

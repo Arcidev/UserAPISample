@@ -30,7 +30,7 @@ namespace RestAPI.Controllers
         /// Get user from the system by guid
         /// </summary>
         /// <param name="id">User id</param>
-        /// <returns>Informationa about user</returns>
+        /// <returns>Information about user</returns>
         /// <example>api/users/00000000-0000-0000-0000-000000000000</example>
         [Authorize, HttpGet("{id}")]
         public async Task<UserDTO> Get(Guid id)

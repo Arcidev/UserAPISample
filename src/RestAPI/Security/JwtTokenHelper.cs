@@ -19,8 +19,8 @@ namespace RestAPI.Security
         /// <exception cref="InvalidOperationException">Thrown when <see cref="secret"/> is null</exception>
         public static string Secret
         {
-            get { return secret ?? throw new InvalidOperationException(); }
-            set { secret = value; }
+            get => secret ?? throw new InvalidOperationException();
+            set => secret = value;
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using AutoMapper;
 using BL.Configuration;
 using BL.DTO.User;
 using BL.Exceptions;
@@ -5,6 +6,7 @@ using BL.Facades;
 using BL.Repositories;
 using BL.Security;
 using DAL.Entities;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Riganti.Utils.Infrastructure.Core;
 using System;
@@ -17,10 +19,12 @@ namespace Tests.BL
     {
         private const string password = "123456";
         private static readonly Guid guid = Guid.NewGuid();
+        private static readonly IMapper mapper;
 
-        public UserTests()
+        static UserTests()
         {
-            AutoMapperInstaller.Init();
+            var services = new ServiceCollection().ConfigureAutoMapper().BuildServiceProvider();
+            mapper = services.GetService<IMapper>();
         }
 
         [Fact]
@@ -29,7 +33,7 @@ namespace Tests.BL
             var mock = new Mock<IUserRepository>();
             mock.Setup(x => x.Insert(It.IsNotNull<User>())).Callback((User user) => user.Id = guid);
 
-            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
+            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock(), mapper);
 
             var signedUser = await userFacade.AddUserAsync(new UserCreateDTO()
             {
@@ -50,7 +54,7 @@ namespace Tests.BL
             var mock = new Mock<IUserRepository>();
             mock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
 
-            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
+            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock(), mapper);
             var signedUser = await userFacade.SignInUser(new UserCredentialsDTO()
             {
                 Email = null,
@@ -69,7 +73,7 @@ namespace Tests.BL
             var mock = new Mock<IUserRepository>();
             mock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<IIncludeDefinition<User>>())).Returns(Task.FromResult(user));
 
-            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
+            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock(), mapper);
             var userDto = await userFacade.VerifyAndGetUser(user.Id, password);
 
             Assert.NotNull(userDto);
@@ -85,7 +89,7 @@ namespace Tests.BL
             var mock = new Mock<IUserRepository>();
             mock.Setup(x => x.GetByIdAsync(It.IsNotIn(Guid.Empty), It.IsAny<IIncludeDefinition<User>>())).Returns(Task.FromResult(user));
 
-            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
+            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock(), mapper);
             await Assert.ThrowsAsync<BLException>(() => userFacade.VerifyAndGetUser(user.Id, password));
             await Assert.ThrowsAsync<BLException>(() => userFacade.VerifyAndGetUser(Guid.Empty, password));
         }
@@ -99,7 +103,7 @@ namespace Tests.BL
             var mock = new Mock<IUserRepository>();
             mock.Setup(x => x.GetByEmailAsync(It.IsNotNull<string>())).Returns(Task.FromResult(user));
 
-            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock());
+            var userFacade = new UserFacade(() => mock.Object, () => CreateUoWProviderMock(), mapper);
             await Assert.ThrowsAsync<BLException>(() => userFacade.SignInUser(new UserCredentialsDTO()));
             await Assert.ThrowsAsync<BLException>(() => userFacade.SignInUser(new UserCredentialsDTO() { Email = string.Empty, Password = $"{password}{password}" }));
         }

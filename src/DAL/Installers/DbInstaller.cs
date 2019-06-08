@@ -17,6 +17,12 @@ namespace DAL.Installers
         /// <returns>Passed DI container to allow chaining</returns>
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, string connectionString)
         {
+            if (services == null)
+                throw new ArgumentNullException(nameof(services));
+
+            if (connectionString == null)
+                throw new ArgumentException(nameof(connectionString));
+
             return services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString), ServiceLifetime.Transient, ServiceLifetime.Transient)
                 .AddTransient<Func<DbContext>>(provider => () => provider.GetService<AppDbContext>());
         }

@@ -19,15 +19,18 @@ namespace BL.Facades
     public class UserFacade : BaseFacade
     {
         private readonly Func<IUserRepository> userRepositoryFunc;
+        private readonly IMapper mapper;
 
         /// <summary>
         /// Creates new instance of User facade
         /// </summary>
         /// <param name="userRepositoryFunc">Functor of repository allowing operations on <see cref="User"/> entity</param>
         /// <param name="uowFunc">Functor for instantiating <see cref="IUnitOfWorkProvider"/></param>
-        public UserFacade(Func<IUserRepository> userRepositoryFunc, Func<IUnitOfWorkProvider> uowFunc) : base(uowFunc)
+        /// <param name="mapper"><see cref="AutoMapper"/> instance</param>
+        public UserFacade(Func<IUserRepository> userRepositoryFunc, Func<IUnitOfWorkProvider> uowFunc, IMapper mapper) : base(uowFunc)
         {
             this.userRepositoryFunc = userRepositoryFunc;
+            this.mapper = mapper;
         }
 
         /// <summary>
@@ -38,28 +41,26 @@ namespace BL.Facades
         /// <exception cref="BLException">Throw when email has been already used</exception>
         public async Task<UserSignedDTO> AddUserAsync(UserCreateDTO user)
         {
-            using (var uow = UowProviderFunc().Create())
-            {
-                var repo = userRepositoryFunc();
-                if (await repo.GetByEmailAsync(user?.Email) != null)
-                    throw new BLException(UserErrorCode.EmailAlreadyUsed, ErrorMessages.EmailAlreadyUsed);
+            using var uow = UowProviderFunc().Create();
+            var repo = userRepositoryFunc();
+            if (await repo.GetByEmailAsync(user?.Email) != null)
+                throw new BLException(UserErrorCode.EmailAlreadyUsed, ErrorMessages.EmailAlreadyUsed);
 
-                var entity = Mapper.Map<User>(user);
-                var (hash, salt) = SecurityHelper.CreateHash(user.Password);
-                var currentDateTime = DateTime.Now;
-                entity.PasswordHash = hash;
-                entity.PasswordSalt = salt;
-                entity.LastLoginOn = currentDateTime;
-                entity.CreatedOn = currentDateTime;
-                entity.TokenHash = Convert.ToBase64String(SecurityHelper.CreateHash(salt, user.Token));
+            var entity = mapper.Map<User>(user);
+            var (hash, salt) = SecurityHelper.CreateHash(user.Password);
+            var currentDateTime = DateTime.Now;
+            entity.PasswordHash = hash;
+            entity.PasswordSalt = salt;
+            entity.LastLoginOn = currentDateTime;
+            entity.CreatedOn = currentDateTime;
+            entity.TokenHash = Convert.ToBase64String(SecurityHelper.CreateHash(salt, user.Token));
 
-                repo.Insert(entity);
-                await uow.CommitAsync();
+            repo.Insert(entity);
+            await uow.CommitAsync();
 
-                var result = Mapper.Map<UserSignedDTO>(entity);
-                result.Token = user.Token;
-                return result;
-            }
+            var result = mapper.Map<UserSignedDTO>(entity);
+            result.Token = user.Token;
+            return result;
         }
 
         /// <summary>
@@ -70,15 +71,13 @@ namespace BL.Facades
         /// <exception cref="BLException">Throw when token provided does not match user token</exception>
         public async Task<UserDTO> VerifyAndGetUser(Guid id, string token)
         {
-            using (var uow = UowProviderFunc().Create())
-            {
-                var repo = userRepositoryFunc();
-                var user = await repo.GetByIdAsync(id, new StringPathIncludeDefinition<User>(nameof(User.Telephones)));
-                if (user == null || !SecurityHelper.VerifyHashedPassword(user.TokenHash, user.PasswordSalt, token))
-                    throw new BLException(UserErrorCode.TokenMismatch, ErrorMessages.Unauthorized);
+            using var uow = UowProviderFunc().Create();
+            var repo = userRepositoryFunc();
+            var user = await repo.GetByIdAsync(id, new StringPathIncludeDefinition<User>(nameof(User.Telephones)));
+            if (user == null || !SecurityHelper.VerifyHashedPassword(user.TokenHash, user.PasswordSalt, token))
+                throw new BLException(UserErrorCode.TokenMismatch, ErrorMessages.Unauthorized);
 
-                return Mapper.Map<UserDTO>(user);
-            }
+            return mapper.Map<UserDTO>(user);
         }
 
         /// <summary>
@@ -89,21 +88,19 @@ namespace BL.Facades
         /// <exception cref="BLException">Throw when user credentials are invalid</exception>
         public async Task<UserSignedDTO> SignInUser(UserCredentialsDTO credentials)
         {
-            using (var uow = UowProviderFunc().Create())
-            {
-                var repo = userRepositoryFunc();
-                var user = await repo.GetByEmailAsync(credentials.Email);
-                if (user == null || !SecurityHelper.VerifyHashedPassword(user.PasswordHash, user.PasswordSalt, credentials.Password))
-                    throw new BLException(UserErrorCode.InvalidCredentials, ErrorMessages.InvalidCredentials);
+            using var uow = UowProviderFunc().Create();
+            var repo = userRepositoryFunc();
+            var user = await repo.GetByEmailAsync(credentials.Email);
+            if (user == null || !SecurityHelper.VerifyHashedPassword(user.PasswordHash, user.PasswordSalt, credentials.Password))
+                throw new BLException(UserErrorCode.InvalidCredentials, ErrorMessages.InvalidCredentials);
 
-                user.LastLoginOn = DateTime.Now;
-                user.TokenHash = Convert.ToBase64String(SecurityHelper.CreateHash(user.PasswordSalt, credentials.Token));
-                await uow.CommitAsync();
+            user.LastLoginOn = DateTime.Now;
+            user.TokenHash = Convert.ToBase64String(SecurityHelper.CreateHash(user.PasswordSalt, credentials.Token));
+            await uow.CommitAsync();
 
-                var result = Mapper.Map<UserSignedDTO>(user);
-                result.Token = credentials.Token;
-                return result;
-            }
+            var result = mapper.Map<UserSignedDTO>(user);
+            result.Token = credentials.Token;
+            return result;
         }
     }
 }

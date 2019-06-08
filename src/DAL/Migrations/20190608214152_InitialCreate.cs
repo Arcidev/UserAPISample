@@ -16,6 +16,7 @@ namespace DAL.Migrations
                     Name = table.Column<string>(maxLength: 255, nullable: false),
                     PasswordSalt = table.Column<string>(maxLength: 100, nullable: false),
                     PasswordHash = table.Column<string>(maxLength: 100, nullable: false),
+                    TokenHash = table.Column<string>(maxLength: 100, nullable: false),
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     LastUpdatedOn = table.Column<DateTime>(nullable: true),
                     LastLoginOn = table.Column<DateTime>(nullable: false)
@@ -30,7 +31,7 @@ namespace DAL.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(nullable: false),
-                    Number = table.Column<string>(nullable: false)
+                    Number = table.Column<string>(maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
