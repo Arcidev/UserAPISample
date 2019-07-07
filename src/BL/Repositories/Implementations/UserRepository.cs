@@ -21,7 +21,7 @@ namespace BL.Repositories.Implementations
         /// <inheritdoc />
         public async Task<User> GetByEmailAsync(string email)
         {
-            return await Context.Users.FirstOrDefaultAsync(x => x.Email == email);
+            return await Context.Users.FirstOrDefaultAsync(x => x.Email == email).ConfigureAwait(false);
         }
     }
 }
