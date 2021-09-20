@@ -1,5 +1,5 @@
 # UserAPISample
-Sample Rest API application handling user sign up/sign in and verification using JWT token. The application is built with .Asp Net Core 3.0
+Sample Rest API application handling user sign up/sign in and verification using JWT token. The application is built with .Asp Net Core 5.0
 
 ## Build Status
 [![Build status](https://img.shields.io/travis/com/Arcidev/UserApiSample.svg?logo=travis&style=flat-square)](https://travis-ci.com/Arcidev/userapisample)
